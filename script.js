@@ -1,46 +1,70 @@
-const display = document.getElementById("display");
-let timer = null;
-let startTime = 0;
-let elapsedTime = 0;
-let isRunning = false;
-
-function start(){
-    if(!isRunning){
-        startTime = Date.now() - elapsedTime;
-        timer = setInterval(update, 10);
-        isRunning = true;
+document.addEventListener("DOMContentLoaded", () => {
+    let seconds = 0;
+    let timerInterval = null;
+    const display = document.getElementById("display");
+    const startButton = document.getElementById("startButton");
+  
+    function updateDisplay() {
+      let hours = Math.floor(seconds / 3600);
+      let minutes = Math.floor((seconds % 3600) / 60);
+      let secs = seconds % 60;
+  
+      display.textContent = 
+        String(hours).padStart(2, "0") + ":" + 
+        String(minutes).padStart(2, "0") + ":" + 
+        String(secs).padStart(2, "0");
     }
-}
-
-function stop(){
-    if(isRunning){
-        clearInterval(timer);
-        elapsedTime = Date.now() - startTime;
-        isRunning = false;
-        }
-}
-
-function reset(){
-    clearInterval(timer);
-    startTime = 0;
-    elapsedTime = 0;
-    isRunning = false;
-    display.textContent = "00:00:00:00"
-}
-
-function update(){
-    const currentTime = Date.now();
-    elapsedTime = currentTime - startTime;
-
-    let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-    let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
-    let seconds = Math.floor(elapsedTime / 1000 % 60);
-    let milliseconds = Math.floor(elapsedTime % 1000 / 10);
-
-    hours = String(hours).padStart(2, "0");
-    minutes = String(minutes).padStart(2, "0");
-    seconds = String(seconds).padStart(2, "0");
-    milliseconds = String(milliseconds).padStart(2, "0");
-
-    display.textContent = `${hours}:${minutes}:${seconds}:${milliseconds}`
-}
+  
+    function add() {
+      seconds += 60;
+      updateDisplay();
+    }
+  
+    function remove() {
+      if (seconds >= 60) {
+        seconds -= 60;
+        updateDisplay();
+      }
+    }
+  
+    function toggleTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        startButton.textContent = "Start";
+        startButton.classList.remove("pause");
+      } else {
+        timerInterval = setInterval(() => {
+          if (seconds > 0) {
+            seconds--;
+            updateDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            startButton.textContent = "Start";
+            startButton.classList.remove("pause");
+          }
+        }, 1000);
+        startButton.textContent = "Pause";
+        startButton.classList.add("pause");
+      }
+    }
+  
+    function reset() {
+      seconds = 0;
+      updateDisplay();
+      clearInterval(timerInterval);
+      timerInterval = null;
+  
+      startButton.textContent = "Start";
+      startButton.classList.remove("pause");
+    }
+  
+    updateDisplay();
+  
+    document.getElementById("startButton").addEventListener("click", toggleTimer);
+    document.getElementById("resetButton").addEventListener("click", reset);
+    document.getElementById("addButton").addEventListener("click", add);
+    document.getElementById("removeButton").addEventListener("click", remove);
+  });
+  
